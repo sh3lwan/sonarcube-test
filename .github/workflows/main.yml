@@ -37,9 +37,7 @@ jobs:
             -G \
             --data-urlencode "componentKeys=$SONAR_PROJECT_KEY" \
             --data-urlencode "resolved=false"
-        # run: |
-        # echo "SonarQube Issues:"
-        # curl -X GET -u ${{ secrets.SONAR_LOGIN_SECRET }}: "https://sonarcloud.io/api/issues/search?componentKeys=your_project_key&resolved=false&statuses=OPEN" | jq -r '.issues[].key'
+            --data-urlencode "statuses=OPEN" | jq -r '.issues[].key'
 
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
