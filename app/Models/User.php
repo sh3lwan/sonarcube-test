@@ -12,6 +12,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
     protected string $password = "00000";
+    
     protected string $pinPassword2 = "00000";
     /**
      * The attributes that are mass assignable.
