@@ -23,12 +23,25 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      - name: Display SonarQube Issues
-        run: |
-          echo "SonarQube Issues:"
-          curl -X GET -u $SONAR_LOGIN: "https://sonarcloud.io/api/issues/search?componentKeys=your_project_key&resolved=false&statuses=OPEN" | jq -r '.issues[].key'
 
-       # Check the Quality Gate status.
+      - name: Display SonarQube issues
+        if: always()
+        run: |
+          # Retrieve SonarQube issues using the SonarQube API
+          SONAR_API_URL="https://sonarcloud.io/api/issues/search"
+          SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
+          SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
+
+          curl -sL -u "$SONAR_TOKEN:" \
+            -X GET "$SONAR_API_URL" \
+            -G \
+            --data-urlencode "componentKeys=$SONAR_PROJECT_KEY" \
+            --data-urlencode "resolved=false"
+        # run: |
+        # echo "SonarQube Issues:"
+        # curl -X GET -u ${{ secrets.SONAR_LOGIN_SECRET }}: "https://sonarcloud.io/api/issues/search?componentKeys=your_project_key&resolved=false&statuses=OPEN" | jq -r '.issues[].key'
+
+      # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
         uses: sonarsource/sonarqube-quality-gate-action@master
