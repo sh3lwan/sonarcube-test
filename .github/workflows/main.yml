@@ -23,6 +23,11 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Display SonarQube Issues
+        run: |
+          echo "SonarQube Issues:"
+          curl -X GET -u $SONAR_LOGIN: "https://sonarcloud.io/api/issues/search?componentKeys=your_project_key&resolved=false&statuses=OPEN" | jq -r '.issues[].key'
+
        # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
@@ -37,8 +42,3 @@ jobs:
       # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
       - name: Show SonarQube Quality Gate Status value
         run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
-      
-      - name: Display SonarQube Issues
-        run: |
-          echo "SonarQube Issues:"
-          curl -X GET -u $SONAR_LOGIN: "https://sonarcloud.io/api/issues/search?componentKeys=your_project_key&resolved=false&statuses=OPEN" | jq -r '.issues[].key'
