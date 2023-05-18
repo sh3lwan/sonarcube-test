@@ -37,7 +37,7 @@ jobs:
             -G \
             --data-urlencode "componentKeys=$SONAR_PROJECT_KEY" \
             --data-urlencode "resolved=false"
-            --data-urlencode "statuses=OPEN" | jq -r '.issues[].key'
+            --data-urlencode "statuses=OPEN" | jq -r '.issues[] | {component, line, status, message}'
 
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
