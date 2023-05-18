@@ -17,9 +17,9 @@ jobs:
           fetch-depth: 0
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
-        with:
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-          project-key: sh3lwan_sonarcube-test
-          project-name: sonarcube-test
-          project-version: 1.0
-          sonar-host-url: https://sonarcloud.io/project/overview?id=sh3lwan_sonarcube-test
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: sh3lwan_sonarcube-test
+          SONAR_PROJECT_NAME: sonarcube-test
+          SONAR_PROJECT_VERSION: 1.0
+          SONAR_HOST_URL: https://sonarcloud.io/project/overview?id=sh3lwan_sonarcube-test
