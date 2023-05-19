@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting
-          fetch-depth: 0
+          fetch-depth: 0 # Disabling shallow clone is recommended for improving relevancy of reporting
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
@@ -23,16 +23,8 @@ jobs:
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # Check the Quality Gate status.
-      - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 3 # Force to fail step after specific time.
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: Display SonarQube Issues
-        if: ${{ needs.sonarqube-check.outputs.quality-gate-status == 'FAILED' }}
+        if: always() # ${{ needs.sonarqube-check.outputs.quality-gate-status == 'FAILED' }}
         run: |
           # Retrieve SonarQube issues using the SonarQube API
           SONAR_API_URL="https://sonarcloud.io/api/issues/search"
@@ -42,8 +34,15 @@ jobs:
             -X GET "$SONAR_API_URL?resolved=false&status=TO_REVIEW&componentKeys=$SONAR_PROJECT_KEY" \
               | jq -jr '.issues[] | "[31mClass:"," ",.component,":",.line, "\n", "[31mIssue:", " ", .message, "\n\n"'
 
+      # Check the Quality Gate status.
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 3 # Force to fail step after specific time.
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
       # Optionally you can use the output from the Quality Gate in another step.
       # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
-      - name: Show SonarQube Quality Gate Status value
-        run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+      # - name: Show SonarQube Quality Gate Status value
+        # run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
