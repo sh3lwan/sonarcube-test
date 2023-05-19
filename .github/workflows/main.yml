@@ -24,8 +24,8 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-interaction
 
-      - name: Run Enlightn
-        run: php artisan enlightn
+      # - name: Run Enlightn
+      #   run: php artisan enlightn
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
