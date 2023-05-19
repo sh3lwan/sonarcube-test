@@ -24,8 +24,8 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-interaction
 
-      # - name: Run Enlightn
-      #   run: php artisan enlightn
+      - name: Run Enlightn
+        run: php artisan enlightn
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
@@ -43,7 +43,7 @@ jobs:
           SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
           curl -sL -u "$SONAR_TOKEN:" \
             -X GET "$SONAR_API_URL?componentKeys=$SONAR_PROJECT_KEY"&resolved=false&status=TO_REVIEW&severities=BLOCKER,CRITICAL&ps=100 \
-              | jq -jr '.hotspots[] | "\033[31mClass:\033[0m "," ",.component,":",.line, "\n", "\033[31mClass:\033[0m ", " ", .message, "\n\n"'
+              | jq -jr '.hotspots[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
 
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
