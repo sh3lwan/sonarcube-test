@@ -38,8 +38,7 @@ jobs:
 
           curl -sL -u "$SONAR_TOKEN:" \
             -X GET "$SONAR_API_URL&resolved=false&statuses=OPEN&componentKeys=$SONAR_PROJECT_KEY" \
-              | jq -jr '.issues[] \
-              | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
+              | jq -jr '.issues[] "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
 
      
       # Check the Quality Gate status.
