@@ -16,42 +16,35 @@ jobs:
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
-      # - name: SonarCloud Scan
-      #   uses: sonarsource/sonarcloud-github-action@master
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # Check the Quality Gate status.
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        # Force to fail step after specific time.
+        timeout-minutes: 3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Display SonarQube issues
-      #   if: always()
-        # run: |
-        #   # Display SonarQube issues using the SonarQube API and format with jq
-        #   curl -sL -u "${{ secrets.SONAR_LOGIN }}:${{ secrets.SONAR_TOKEN }}" \
-        #     "https://sonarcloud.io/api/issues/search?componentKeys=${{ secrets.SONAR_PROJECT_KEY }}&resolved=false" \
-        #     | jq -r '.issues[] | {component, line, status, message}'
+        if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status == "FAILED"
         run: |
           # Retrieve SonarQube issues using the SonarQube API
           SONAR_API_URL="https://sonarcloud.io/api/issues/search"
           SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
           SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
-
           curl -sL -u "$SONAR_TOKEN:" \
-            -X GET "$SONAR_API_URL?resolved=false&statuses=OPEN&componentKeys=$SONAR_PROJECT_KEY" \
-              | jq -jr '.issues[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
+            -X GET "$SONAR_API_URL?resolved=false&status=TO_REVIEW&componentKeys=$SONAR_PROJECT_KEY" \
+              | jq -jr '.issues[] | "[31mClass:"," ",.component,":",.line, "\n", "[31mIssue:", " ", .message, "\n\n"'
 
-     
-      # Check the Quality Gate status.
-      # - name: SonarQube Quality Gate check
-      #   id: sonarqube-quality-gate-check
-      #   uses: sonarsource/sonarqube-quality-gate-action@master
-      #   # Force to fail step after specific time.
-      #   timeout-minutes: 3
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     # SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
-
+      
       # Optionally you can use the output from the Quality Gate in another step.
       # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
-      # - name: Show SonarQube Quality Gate Status value
-        # run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+      - name: Show SonarQube Quality Gate Status value
+        run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
