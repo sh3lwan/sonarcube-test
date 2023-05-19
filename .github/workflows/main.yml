@@ -31,7 +31,7 @@ jobs:
           SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
           SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
           curl -sL -u "$SONAR_TOKEN:" \
-            -X GET "$SONAR_API_URL?resolved=false&statuses=OPEN,REOPENED&severities=CRITICAL,MAJOR&componentKeys=$SONAR_PROJECT_KEY" \
+            -X GET "$SONAR_API_URL?componentKeys=$SONAR_PROJECT_KEY"&resolved=false&statuses=OPEN&severities=BLOCKER,CRITICAL&ps=100 \
               | jq -jr '.issues[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
 
       # Check the Quality Gate status.
