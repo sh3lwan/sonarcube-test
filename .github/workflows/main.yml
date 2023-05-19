@@ -38,10 +38,10 @@ jobs:
 
           curl -sL -u "$SONAR_TOKEN:" \
             -X GET "$SONAR_API_URL&resolved=false&statuses=OPEN&componentKeys=$SONAR_PROJECT_KEY" \
-            | jq -r '.issues[] | {component, line, status, message}'
-      - name: read issues
-        run: echo $(cat issues.json | jq -c '.issues[] | {component, line, status, message}')
+              | jq -jr '.issues[] \
+              | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
 
+     
       # Check the Quality Gate status.
       # - name: SonarQube Quality Gate check
       #   id: sonarqube-quality-gate-check
