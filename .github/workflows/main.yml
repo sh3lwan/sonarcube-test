@@ -37,12 +37,7 @@ jobs:
           SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
 
           curl -sL -u "$SONAR_TOKEN:" \
-            -X GET "$SONAR_API_URL" \
-            -G \
-            --data-urlencode "componentKeys=$SONAR_PROJECT_KEY" \
-            --data-urlencode "resolved=false"
-            --data-urlencode "statuses=OPEN" \
-            -o issues.json
+            -X GET "$SONAR_API_URL&resolved=false&statuses=OPEN&componentKeys=$SONAR_PROJECT_KEY" \
             | jq -r '.issues[] | {component, line, status, message}'
       - name: read issues
         run: echo $(cat issues.json | jq -c '.issues[] | {component, line, status, message}')
