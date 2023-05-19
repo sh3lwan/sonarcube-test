@@ -45,7 +45,7 @@ jobs:
             -o issues.json
             | jq -r '.issues[] | {component, line, status, message}'
       - name: read issues
-          run: echo $(cat issues.json | jq -c '.issues[] | {component, line, status, message}')
+        run: echo $(cat issues.json | jq -c '.issues[] | {component, line, status, message}')
 
       # Check the Quality Gate status.
       # - name: SonarQube Quality Gate check
