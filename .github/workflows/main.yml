@@ -30,21 +30,19 @@ jobs:
         timeout-minutes: 3 # Force to fail step after specific time.
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        after-script:
-          - if [[ "$QUALITY_GATE_STATUS" == "ERROR" ]]; then
-              export SONAR_API_URL="https://sonarcloud.io/api/issues/search"
-              export SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
-              export SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
-              curl -sL -u "$SONAR_TOKEN:" \
-                -X GET "$SONAR_API_URL?resolved=false&status=TO_REVIEW&severities=CRITICAL,MAJOR&componentKeys=$SONAR_PROJECT_KEY" \
-                  | jq -jr '.issues[] | "[31mClass:"," ",.component,":",.line, "\n", "[31mIssue:", " ", .message, "\n\n"'
-            fi
 
-      # - name: Display SonarQube Issues
-      #   if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status == FAILED
-      #   run: |
-      #     # Retrieve SonarQube issues using the SonarQube API
-          
+      - name: Display SonarQube Issues
+        if: ${{ needs.sonarqube-check.outputs.quality-gate-status == 'FAILED' }}
+        run: |
+          # Retrieve SonarQube issues using the SonarQube API
+          SONAR_API_URL="https://sonarcloud.io/api/issues/search"
+          SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
+          SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
+          curl -sL -u "$SONAR_TOKEN:" \
+            -X GET "$SONAR_API_URL?resolved=false&status=TO_REVIEW&componentKeys=$SONAR_PROJECT_KEY" \
+              | jq -jr '.issues[] | "[31mClass:"," ",.component,":",.line, "\n", "[31mIssue:", " ", .message, "\n\n"'
+
+      
       # Optionally you can use the output from the Quality Gate in another step.
       # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
       - name: Show SonarQube Quality Gate Status value
