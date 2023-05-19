@@ -43,7 +43,7 @@ jobs:
           SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
           curl -sL -u "$SONAR_TOKEN:" \
             -X GET "$SONAR_API_URL?componentKeys=$SONAR_PROJECT_KEY"&resolved=false&status=TO_REVIEW&severities=BLOCKER,CRITICAL&ps=100 \
-              | jq -jr '.hotspots[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
+              | jq -jr '.hotspots[] | "\x1b[31mClass:\x1b[0m "," ",.component,":",.line, "\n", "\x1b[31mIssue:\x1b[0m ", " ", .message, "\n\n"'
 
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
