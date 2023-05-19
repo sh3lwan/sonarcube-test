@@ -19,14 +19,14 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'
+          php-version: '8.1'
 
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-interaction
 
       - name: Run Enlightn
         run: php artisan enlightn
-        
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
@@ -42,8 +42,8 @@ jobs:
           SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
           SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
           curl -sL -u "$SONAR_TOKEN:" \
-            -X GET "$SONAR_API_URL?componentKeys=$SONAR_PROJECT_KEY"&resolved=false&statuses=OPEN&severities=BLOCKER,CRITICAL&ps=100 \
-              | jq -jr '.issues[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
+            -X GET "$SONAR_API_URL?componentKeys=$SONAR_PROJECT_KEY"&resolved=false&status=TO_REVIEW&severities=BLOCKER,CRITICAL&ps=100 \
+              | jq -jr '.hotspots[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
 
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
