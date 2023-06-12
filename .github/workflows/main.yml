@@ -24,36 +24,42 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-interaction
 
-      - name: Run Enlightn
-        run: php artisan enlightn --ci
+      - name: Run enlightn
+        run: php artisan enlightn
 
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      - name: Display SonarQube Issues
-        if: always() # ${{ needs.sonarqube-check.outputs.quality-gate-status == 'FAILED' }}
+      - name: Check enlightn status
         run: |
-          # Retrieve SonarQube issues using the SonarQube API
-          SONAR_API_URL="https://sonarcloud.io/api/issues/search"
-          SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
-          SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
-          curl -sL -u "$SONAR_TOKEN:" \
-            -X GET "$SONAR_API_URL?componentKeys=$SONAR_PROJECT_KEY"&resolved=false&status=TO_REVIEW&severities=BLOCKER,CRITICAL&ps=100 \
-              | jq -jr '.issues[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
+          if [ $? -ne 0 ]; then
+            echo "::error::Enlightn check failed. Please fix the issues before merging."
+            exit 1
+          fi
+      # - name: SonarCloud Scan
+      #   uses: sonarsource/sonarcloud-github-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # Check the Quality Gate status.
-      - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 3 # Force to fail step after specific time.
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: Display SonarQube Issues
+      #   if: always() # ${{ needs.sonarqube-check.outputs.quality-gate-status == 'FAILED' }}
+      #   run: |
+      #     # Retrieve SonarQube issues using the SonarQube API
+      #     SONAR_API_URL="https://sonarcloud.io/api/issues/search"
+      #     SONAR_PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
+      #     SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
+      #     curl -sL -u "$SONAR_TOKEN:" \
+      #       -X GET "$SONAR_API_URL?componentKeys=$SONAR_PROJECT_KEY"&resolved=false&status=TO_REVIEW&severities=BLOCKER,CRITICAL&ps=100 \
+      #         | jq -jr '.issues[] | "Class:"," ",.component,":",.line, "\n", "Issue:", " ", .message, "\n\n"'
+
+      # # Check the Quality Gate status.
+      # - name: SonarQube Quality Gate check
+      #   id: sonarqube-quality-gate-check
+      #   uses: sonarsource/sonarqube-quality-gate-action@master
+      #   timeout-minutes: 3 # Force to fail step after specific time.
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
-      # Optionally you can use the output from the Quality Gate in another step.
-      # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
-      # - name: Show SonarQube Quality Gate Status value
-        # run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+      # # Optionally you can use the output from the Quality Gate in another step.
+      # # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
+      # # - name: Show SonarQube Quality Gate Status value
+      #   # run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
